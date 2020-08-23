@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import sys
 import zipfile
 import tarfile
 from os import path
@@ -52,7 +51,7 @@ if __name__ == "__main__":
         final_project_path = home_directory+"/"+args[1]
         zipped_project_path = home_directory+"/"+args[0]
     else:
-        raise Exception("Error: 2 arguments required {} provided".format(len(sys.argv)-1))
+        raise Exception("Error: 2 arguments required {} provided".format(len(args)-1))
 
     if not path.exists(zipped_project_path):
         raise Exception("Error: Zipped Project doesn't exist")
