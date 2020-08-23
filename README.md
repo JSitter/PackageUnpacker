@@ -1,10 +1,10 @@
 # Package Unpacker
-Shell script that allows for the unpackaging of a zipped project into the directory of your choice. Built with Hostgator's shared server in mind.
+Shell script that allows for the unpackaging of a zipped project into the directory of your choice. Built using Python 3.5 and Hostgator's shared server in mind.
 
 ## Usage
-Run `unpacker.py <zipped package> <final location>`. 
-On Hostgator run  `hostgator-runner.sh <zipped package> <final location>`. 
+Run `unpacker.py [options] <zipped package location> <final location>`. 
+On Hostgator run  `hostgator-runner.sh [options] <zipped package location> <final location>`. 
 
-## Future Flags
+## Flags
 `-d` to unzip project into existing directory instead of creating a new directory.
-`-h` to provide host specific settings from a file. 
+`-h --help` show help screen.
