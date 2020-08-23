@@ -2,6 +2,7 @@
 import sys
 import zipfile
 import gzip
+import tarfile
 from os import path
 from optparse import OptionParser
 
@@ -12,7 +13,7 @@ def unpack_zip(source, destination):
     print("Done")
 
 def unpack_gz(source, destination):
-    print("Unpack gz")
+    print("Tar")
 
 def unpack_zip_into(source, destination):
     zipReference = zipfile.ZipFile(source, 'r')
@@ -25,7 +26,14 @@ def unpack_zip_into(source, destination):
     print("Done")
 
 def unpack_gz_into(source, destination):
-    print("Unpack gz into")
+    tar = tarfile.open(source, 'r:gz')
+    allfiles = tar.getnames()
+    for file in allfiles[1:]:
+        file_path = file.split('/')[1:]
+        trunc_path = '/'.join(file_path)
+        tar.extract(file, path=destination+"/"+trunc_path)
+    tar.close()
+    print("Done")
 
 if __name__ == "__main__":
     usage = "usage: %prog [options] zipped_package_location destination_package_location"
