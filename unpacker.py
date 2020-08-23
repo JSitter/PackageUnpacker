@@ -9,12 +9,20 @@ def unpack_zip(source, destination):
     zipReference = zipfile.ZipFile(source, 'r')
     zipReference.extractall(destination)
     zipReference.close()
+    print("Done")
 
 def unpack_gz(source, destination):
     print("Unpack gz")
 
 def unpack_zip_into(source, destination):
-    print("Unpack into")
+    zipReference = zipfile.ZipFile(source, 'r')
+    allfiles = zipReference.namelist()
+    for file in allfiles[1:]:
+        file_path = file.split('/')[1:]
+        trunc_path = '/'.join(file_path)
+        zipReference.extract(file, path=destination+"/"+trunc_path)
+    zipReference.close()
+    print("Done")
 
 def unpack_gz_into(source, destination):
     print("Unpack gz into")
