@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import sys
 import zipfile
-import gzip
 import tarfile
 from os import path
 from optparse import OptionParser
@@ -13,7 +12,9 @@ def unpack_zip(source, destination):
     print("Done")
 
 def unpack_gz(source, destination):
-    print("Tar")
+    tarball = tarfile.open(source, 'r:gz')
+    tarball.extractall(path=destination)
+    print("Done")
 
 def unpack_zip_into(source, destination):
     zipReference = zipfile.ZipFile(source, 'r')
