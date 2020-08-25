@@ -27,7 +27,7 @@ def unpack_gz(source, destination):
 def unpack_zip_into(source, destination, replace=False):
     zipReference = zipfile.ZipFile(source, 'r')
     allfiles = zipReference.namelist()
-    temp_source_dir = f"{temp_dir}/{allfiles[0]}"
+    temp_source_dir = "{}/{}".format(temp_dir, allfiles[0])
     check_temp_dir()
     
     zipReference = zipfile.ZipFile(source, 'r')
@@ -35,14 +35,14 @@ def unpack_zip_into(source, destination, replace=False):
     files = os.listdir(temp_source_dir)
 
     for file in files:
-        file_destination = f"{destination}/{file}"
+        file_destination = "{}/{}".format(destination, file)
         if not path.exists(file_destination):
-            shutil.move(f"{temp_source_dir}/{file}", destination)
+            shutil.move("{}/{}".format(temp_source_dir, file), destination)
         elif replace:
-            replace_item(f"{temp_source_dir}/{file}", f"{destination}/{file}")
-            print(f"Replaced {file}.")
+            replace_item("{}/{}".format(temp_source_dir, file), "{}/{}".format(destination, file))
+            print("Replaced {}.".format(file))
         else:
-            print(f"Skipping {file}. Already Exists. ")
+            print("Skipping {}. Already Exists. ".format(file))
     shutil.rmtree(temp_source_dir)
     
     zipReference.close()
@@ -59,7 +59,7 @@ def replace_item(source, destination):
 def unpack_gz_into(source, destination, replace=False):
     tar = tarfile.open(source, 'r:gz')
     allfiles = tar.getnames()
-    temp_source_dir = f"{temp_dir}/{allfiles[0]}"
+    temp_source_dir = "{}/{}".format(temp_dir, allfiles[0])
 
     if not path.exists(temp_dir):
         os.mkdir(temp_dir)
@@ -69,23 +69,23 @@ def unpack_gz_into(source, destination, replace=False):
     files = os.listdir(temp_source_dir)
 
     for file in files:
-        file_destination = f"{destination}/{file}"
+        file_destination = "{}/{}".format(destination, file)
         if not path.exists(file_destination):
-            shutil.move(f"{temp_source_dir}/{file}", destination)
+            shutil.move("{}/{}".format(temp_source_dir, file), destination)
         elif replace:
-            replace_item(f"{temp_source_dir}/{file}", f"{destination}/{file}")
-            print(f"Replaced {file}.")
+            replace_item("{}/{}".format(temp_source_dir, file), "{}/{}".format(destination, file))
+            print("Replaced {}.".format(file))
         else:
-            print(f"Skipping {file}. Already exists.")
+            print("Skipping {}. Already exists.".format(file))
     shutil.rmtree(temp_source_dir)
     print("Done")
 
 def remove_file(source):
-    print(f"remove file: {source}")
+    print("remove file: {}".format(source))
     os.remove(source)
 
 def remove_directory(source):
-    print(f"Remove directory {source}")
+    print("Remove directory {}".format(source))
     shutil.rmtree(source)
     
 
@@ -105,7 +105,6 @@ if __name__ == "__main__":
                     default=False)
 
     (options, args) = parser.parse_args()
-    print(f"Options {options} {args}")
     home_directory = path.dirname(path.realpath(__file__))
 
     if len(args) > 1:
