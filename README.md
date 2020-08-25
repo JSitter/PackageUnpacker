@@ -8,3 +8,4 @@ On Hostgator run  `hostgator-runner.sh [options] <zipped package location> <fina
 ## Flags
 `-d` to unzip project into existing directory instead of creating a new directory.
 `-h --help` show help screen.
+`-r --replace` replace existing files.
