@@ -1,8 +1,17 @@
 #!/usr/bin/env python3
 import zipfile
 import tarfile
+import os
+import shutil
 from os import path
 from optparse import OptionParser
+
+temp_dir = './.tempdir'
+
+
+def check_temp_dir():
+    if not path.exists(temp_dir):
+        os.mkdir(temp_dir)
 
 def unpack_zip(source, destination):
     zipReference = zipfile.ZipFile(source, 'r')
@@ -15,25 +24,70 @@ def unpack_gz(source, destination):
     tarball.extractall(path=destination)
     print("Done")
 
-def unpack_zip_into(source, destination):
+def unpack_zip_into(source, destination, replace=False):
     zipReference = zipfile.ZipFile(source, 'r')
     allfiles = zipReference.namelist()
-    for file in allfiles[1:]:
-        file_path = file.split('/')[1:]
-        trunc_path = '/'.join(file_path)
-        zipReference.extract(file, path=destination+"/"+trunc_path)
+    temp_source_dir = f"{temp_dir}/{allfiles[0]}"
+    check_temp_dir()
+    
+    zipReference = zipfile.ZipFile(source, 'r')
+    zipReference.extractall(temp_dir)
+    files = os.listdir(temp_source_dir)
+
+    for file in files:
+        file_destination = f"{destination}/{file}"
+        if not path.exists(file_destination):
+            shutil.move(f"{temp_source_dir}/{file}", destination)
+        elif replace:
+            replace_item(f"{temp_source_dir}/{file}", f"{destination}/{file}")
+            print(f"Replaced {file}.")
+        else:
+            print(f"Skipping {file}. Already Exists. ")
+    shutil.rmtree(temp_source_dir)
+    
     zipReference.close()
     print("Done")
 
-def unpack_gz_into(source, destination):
+def replace_item(source, destination):
+    if path.isdir(destination):
+        remove_directory(destination)
+    else:
+        remove_file(destination)
+    shutil.move(source, destination)
+
+
+def unpack_gz_into(source, destination, replace=False):
     tar = tarfile.open(source, 'r:gz')
     allfiles = tar.getnames()
-    for file in allfiles[1:]:
-        file_path = file.split('/')[1:]
-        trunc_path = '/'.join(file_path)
-        tar.extract(file, path=destination+"/"+trunc_path)
-    tar.close()
+    temp_source_dir = f"{temp_dir}/{allfiles[0]}"
+
+    if not path.exists(temp_dir):
+        os.mkdir(temp_dir)
+    
+    tarball = tarfile.open(source, 'r:gz')
+    tarball.extractall(path=temp_dir)
+    files = os.listdir(temp_source_dir)
+
+    for file in files:
+        file_destination = f"{destination}/{file}"
+        if not path.exists(file_destination):
+            shutil.move(f"{temp_source_dir}/{file}", destination)
+        elif replace:
+            replace_item(f"{temp_source_dir}/{file}", f"{destination}/{file}")
+            print(f"Replaced {file}.")
+        else:
+            print(f"Skipping {file}. Already exists.")
+    shutil.rmtree(temp_source_dir)
     print("Done")
+
+def remove_file(source):
+    print(f"remove file: {source}")
+    os.remove(source)
+
+def remove_directory(source):
+    print(f"Remove directory {source}")
+    shutil.rmtree(source)
+    
 
 if __name__ == "__main__":
     usage = "usage: %prog [options] zipped_package_location destination_package_location"
@@ -44,7 +98,14 @@ if __name__ == "__main__":
                         dest="directory",
                         default=False)
 
+    parser.add_option("-r","--replace",
+                    help="Replace existing files.",
+                    action="store_true",
+                    dest="replace",
+                    default=False)
+
     (options, args) = parser.parse_args()
+    print(f"Options {options} {args}")
     home_directory = path.dirname(path.realpath(__file__))
 
     if len(args) > 1:
@@ -56,7 +117,7 @@ if __name__ == "__main__":
     if not path.exists(zipped_project_path):
         raise Exception("Error: Zipped Project doesn't exist")
 
-    # May not be needed -- should rely on errors thrown by zipping package
+    # Needs more robust test of compressed package
     ext = zipped_project_path.split('.')[-1]
     if (ext != "zip" ) and (ext != "gz"):
         raise Exception("Error: Unknown project file format. Must be zip or gz")
@@ -66,9 +127,9 @@ if __name__ == "__main__":
 
     if options.directory:
         if ext == "zip":
-            unpack_zip_into(zipped_project_path, final_project_path)
+            unpack_zip_into(zipped_project_path, final_project_path, options.replace)
         else:
-            unpack_gz_into(zipped_project_path, final_project_path)
+            unpack_gz_into(zipped_project_path, final_project_path, options.replace)
     else:
         if ext == "zip":
             unpack_zip(zipped_project_path, final_project_path)
