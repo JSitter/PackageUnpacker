@@ -118,7 +118,6 @@ if __name__ == "__main__":
     if not path.exists(zipped_project_path):
         raise Exception("Error: Zipped Project doesn't exist")
 
-    # Needs more robust test of compressed package
     ext = None
     if tarfile.is_tarfile(zipped_project_path):
         ext = "tar"
