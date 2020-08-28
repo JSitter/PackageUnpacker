@@ -119,8 +119,12 @@ if __name__ == "__main__":
         raise Exception("Error: Zipped Project doesn't exist")
 
     # Needs more robust test of compressed package
-    ext = zipped_project_path.split('.')[-1]
-    if (ext != "zip" ) and (ext != "gz"):
+    ext = None
+    if tarfile.is_tarfile(zipped_project_path):
+        ext = "tar"
+    elif zipfile.is_zipfile(zipped_project_path):
+        ext = "zip"
+    else:
         raise Exception("Error: Unknown project file format. Must be zip or gz")
     if options.directory:
         if not path.exists(final_project_path):
