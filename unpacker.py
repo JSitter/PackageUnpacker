@@ -1,17 +1,35 @@
 #!/usr/bin/env python3
-import zipfile
-import tarfile
-import os
-import shutil
-from os import path
 from optparse import OptionParser
+import os
+from os import path
+import tarfile
+import shutil
+import zipfile
 
 temp_dir = './.tempdir'
-
 
 def check_temp_dir():
     if not path.exists(temp_dir):
         os.mkdir(temp_dir)
+
+def replace_item(source, destination):
+    print("Source {}, dest {}".format(source, destination))
+    if path.isdir(destination):
+        remove_directory(destination)
+    else:
+        remove_file(destination)
+    shutil.move(source, destination)
+
+def unpack_file(temp_file_location, file, destination, replace=False):
+    print("Unpack file function file {} desination {}".format(file, destination))
+    file_destination = "{}/{}".format(destination, file)
+    if not path.exists(file_destination):
+        shutil.move("{}/{}".format(temp_file_location, file), destination)
+    elif replace:
+        replace_item("{}/{}".format(temp_file_location, file), "{}/{}".format(destination, file))
+        print("Replaced {}.".format(file))
+    else:
+        print("Skipping {}. Already Exists. ".format(file))
 
 def unpack_zip(source, destination):
     zipReference = zipfile.ZipFile(source, 'r')
@@ -25,6 +43,7 @@ def unpack_gz(source, destination):
     print("Done")
 
 def unpack_zip_into(source, destination, replace=False):
+    print("Unpack zipinto source {} desination {}".format(source, destination))
     zipReference = zipfile.ZipFile(source, 'r')
     allfiles = zipReference.namelist()
     temp_source_dir = "{}/{}".format(temp_dir, allfiles[0])
@@ -35,26 +54,12 @@ def unpack_zip_into(source, destination, replace=False):
     files = os.listdir(temp_source_dir)
 
     for file in files:
-        file_destination = "{}/{}".format(destination, file)
-        if not path.exists(file_destination):
-            shutil.move("{}/{}".format(temp_source_dir, file), destination)
-        elif replace:
-            replace_item("{}/{}".format(temp_source_dir, file), "{}/{}".format(destination, file))
-            print("Replaced {}.".format(file))
-        else:
-            print("Skipping {}. Already Exists. ".format(file))
+        unpack_file(temp_source_dir, file, destination, replace)
+
     shutil.rmtree(temp_source_dir)
     
     zipReference.close()
     print("Done")
-
-def replace_item(source, destination):
-    if path.isdir(destination):
-        remove_directory(destination)
-    else:
-        remove_file(destination)
-    shutil.move(source, destination)
-
 
 def unpack_gz_into(source, destination, replace=False):
     tar = tarfile.open(source, 'r:gz')
@@ -69,14 +74,8 @@ def unpack_gz_into(source, destination, replace=False):
     files = os.listdir(temp_source_dir)
 
     for file in files:
-        file_destination = "{}/{}".format(destination, file)
-        if not path.exists(file_destination):
-            shutil.move("{}/{}".format(temp_source_dir, file), destination)
-        elif replace:
-            replace_item("{}/{}".format(temp_source_dir, file), "{}/{}".format(destination, file))
-            print("Replaced {}.".format(file))
-        else:
-            print("Skipping {}. Already exists.".format(file))
+        unpack_file(temp_source_dir, file, destination, replace)
+
     shutil.rmtree(temp_source_dir)
     print("Done")
 
@@ -108,7 +107,10 @@ if __name__ == "__main__":
     home_directory = path.dirname(path.realpath(__file__))
 
     if len(args) > 1:
-        final_project_path = home_directory+"/"+args[1]
+        if args[1][-1] == "/":
+            final_project_path = home_directory+"/"+args[1][:-1]
+        else:
+            final_project_path = home_directory+"/"+args[1]
         zipped_project_path = home_directory+"/"+args[0]
     else:
         raise Exception("Error: 2 arguments required {} provided".format(len(args)-1))
